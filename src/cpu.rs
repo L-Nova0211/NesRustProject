@@ -7,6 +7,7 @@ pub struct CPU {
     memory: [u8; 0xFFFF]
 }
 
+
 trait Memory {
     fn memory_read(&self, addr: u16) -> u8; 
 
