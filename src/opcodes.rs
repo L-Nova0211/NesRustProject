@@ -48,6 +48,11 @@ lazy_static! {
         map.insert(0xae, OpCode::new(0xae, "LDX", 3, 4, AddressingMode::Absolute));
         map.insert(0xbe, OpCode::new(0xbe, "LDX", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_Y));
 
+        map.insert(0xa0, OpCode::new(0xa0, "LDY", 2, 2, AddressingMode::Immediate));
+        map.insert(0xa4, OpCode::new(0xa4, "LDY", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0xb4, OpCode::new(0xb4, "LDY", 2, 4, AddressingMode::ZeroPage_X));
+        map.insert(0xac, OpCode::new(0xac, "LDY", 3, 4, AddressingMode::Absolute));
+        map.insert(0xbc, OpCode::new(0xbc, "LDY", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_X));
 
         map.insert(0x85, OpCode::new(0x85, "STA", 2, 3, AddressingMode::ZeroPage));
         map.insert(0x95, OpCode::new(0x95, "STA", 2, 4, AddressingMode::ZeroPage_X));
@@ -66,9 +71,13 @@ lazy_static! {
         map.insert(0xc1, OpCode::new(0xc1, "CMP", 2, 6, AddressingMode::Indirect_X));
         map.insert(0xd1, OpCode::new(0xd1, "CMP", 2, 5/*+1 if page crossed*/, AddressingMode::Indirect_Y));
 
-        map.insert(0xc0, OpCode::new(0xc0, "CPX", 2, 2, AddressingMode::Immediate));
-        map.insert(0xc4, OpCode::new(0xc4, "CPX", 2, 3, AddressingMode::ZeroPage));
-        map.insert(0xcc, OpCode::new(0xcc, "CPX", 3, 4, AddressingMode::Absolute));
+        map.insert(0xe0, OpCode::new(0xe0, "CPX", 2, 2, AddressingMode::Immediate));
+        map.insert(0xe4, OpCode::new(0xe4, "CPX", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0xec, OpCode::new(0xec, "CPX", 3, 4, AddressingMode::Absolute));
+
+        map.insert(0xc0, OpCode::new(0xc0, "CPY", 2, 2, AddressingMode::Immediate));
+        map.insert(0xc4, OpCode::new(0xc4, "CPY", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0xcc, OpCode::new(0xcc, "CPY", 3, 4, AddressingMode::Absolute));
 
         map
     };
