@@ -152,6 +152,13 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_a);
     }
 
+    fn ldx(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(mode);
+        let value = self.memory_read(addr);
+        self.register_x = value;
+        self.update_zero_and_negative_flags(self.register_x);
+    }
+
     fn tax(&mut self) {
         self.register_x = self.register_a;
         self.update_zero_and_negative_flags(self.register_x);
@@ -207,8 +214,16 @@ impl CPU {
                     self.lda(&opcode.mode);
                 }
 
+                0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => {
+                    self.ldx(&opcode.mode);
+                }
+
                 0xC9 | 0xC5 | 0xD5 | 0xCD | 0xDD | 0xD9 | 0xC1 | 0xD1 => {
                     self.cmp(&opcode.mode, self.register_a);
+                }
+
+                0xC0 | 0xC4 | 0xCC  => {
+                    self.cmp(&opcode.mode, self.register_x);
                 }
 
                 0xAA => self.tax(),
@@ -255,6 +270,30 @@ mod test {
         assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
     }
 
+        #[test]
+    fn test_0xa2_ldx_is_loading_register_x() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa2, 0x05, 0x00]);
+        assert_eq!(cpu.register_x, 5);
+        assert!(cpu.processor_status & 0b0000_0010 == 0);
+        assert!(cpu.processor_status & 0b1000_0000 == 0);
+    }
+
+    #[test]
+    fn test_0xa2_ldx_zero_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa2, 0x00, 0x00]);
+        assert_eq!(cpu.register_x, 0);
+        assert!(cpu.processor_status & 0b0000_0010 == 0b10);
+    }
+
+    #[test]
+    fn test_0xa2_ldx_negative_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa2, 0xff, 0x00]);
+        assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
+    }
+
     #[test]
     fn test_0xaa_tax_is_moving_from_a_to_x() {
         let mut cpu = CPU::new();
@@ -294,4 +333,29 @@ mod test {
 
         assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
     }
+
+    #[test]
+    fn test_cpx_carry_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa2, 0x05, 0xc0, 0x04, 0x00]);
+
+        assert!(cpu.processor_status & 0b0000_0001 == 0b0000_0001);
+    }
+
+    #[test]
+    fn test_cpx_zero_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa2, 0x05, 0xc0, 0x05, 0x00]);
+
+        assert!(cpu.processor_status & 0b0000_0011 == 0b0000_0011);
+    }
+
+    #[test]
+    fn test_cpx_negative_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa2, 0x05, 0xc0, 0x06, 0x00]);
+
+        assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
+    }
+
 }
