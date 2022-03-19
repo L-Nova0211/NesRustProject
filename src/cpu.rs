@@ -162,6 +162,20 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_x);
     }
 
+    fn cmp(&mut self, mode: &AddressingMode, compared_register: u8){
+        let addr = self.get_operand_address(mode);
+        let value = self.memory_read(addr);
+
+        if value <= compared_register {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        }
+        else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+
+        self.update_zero_and_negative_flags(compared_register.wrapping_sub(value));
+    }
+
 
     fn update_zero_and_negative_flags(&mut self, result: u8) {
         if result == 0 {
@@ -191,6 +205,10 @@ impl CPU {
             match instruction {
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => {
                     self.lda(&opcode.mode);
+                }
+
+                0xC9 | 0xC5 | 0xD5 | 0xCD | 0xDD | 0xD9 | 0xC1 | 0xD1 => {
+                    self.cmp(&opcode.mode, self.register_a);
                 }
 
                 0xAA => self.tax(),
@@ -251,5 +269,29 @@ mod test {
         cpu.load_and_run(vec![0xa9, 0xff, 0xaa, 0xe8, 0x00]);
 
         assert_eq!(cpu.register_x, 0)
+    }
+
+    #[test]
+    fn test_cmp_carry_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x05, 0xc9, 0x04, 0x00]);
+
+        assert!(cpu.processor_status & 0b0000_0001 == 0b0000_0001);
+    }
+
+    #[test]
+    fn test_cmp_zero_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x05, 0xc9, 0x05, 0x00]);
+
+        assert!(cpu.processor_status & 0b0000_0011 == 0b0000_0011);
+    }
+
+    #[test]
+    fn test_cmp_negative_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x05, 0xc9, 0x06, 0x00]);
+
+        assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
     }
 }
