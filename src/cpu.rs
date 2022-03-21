@@ -202,6 +202,13 @@ impl CPU {
         self.operation_with_carry(0xff - value);
     }
 
+    fn and(&mut self, mode: &AddressingMode){
+        let addr = self.get_operand_address(mode);
+        let value = self.memory_read(addr);
+        self.register_a = self.register_a & value;
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
     fn operation_with_carry(&mut self, value: u8){
         let carry_in = self.processor_status & 0b0000_0001;
         let sum = self.register_a as u16 + value as u16 + carry_in as u16;
@@ -284,6 +291,10 @@ impl CPU {
 
                 0xE9 | 0xE5 | 0xF5 | 0xED | 0xFD | 0xF9 | 0xE1 | 0xF1 => {
                     self.sbc(&opcode.mode);
+                }
+
+                0x29 | 0x25 | 0x35 | 0x2D | 0x3D | 0x39 | 0x21 | 0x31 => {
+                    self.and(&opcode.mode);
                 }
 
                 0xAA => self.tax(),
@@ -519,6 +530,32 @@ mod test {
 
         assert!(cpu.processor_status & 0b0000_0001 == 0b0000_0001);
         assert_eq!(cpu.register_a, 0x5f);
+    }
+
+    #[test]
+    fn test_and_0x29() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x50, 0x29, 0x50, 0x00]);
+
+        assert_eq!(cpu.register_a, 0x50);
+    }
+
+    #[test]
+    fn test_and_zero_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x50, 0x29, 0x00, 0x00]);
+
+        assert!(cpu.processor_status & 0b0000_0010 == 0b0000_0010);
+        assert_eq!(cpu.register_a, 0x00);
+    }
+
+    #[test]
+    fn test_and_negative_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0xff, 0x29, 0xff, 0x00]);
+
+        assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
+        assert_eq!(cpu.register_a, 0xff);
     }
 
 }
