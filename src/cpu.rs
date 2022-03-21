@@ -190,6 +190,37 @@ impl CPU {
         self.update_zero_and_negative_flags(compared_register.wrapping_sub(value));
     }
 
+    fn adc(&mut self, mode: &AddressingMode){
+        let addr = self.get_operand_address(mode);
+        let value = self.memory_read(addr);
+        self.operation_with_carry(value);
+    }
+
+    fn operation_with_carry(&mut self, value: u8){
+        let carry_in = self.processor_status & 0b0000_0001;
+        let sum = self.register_a as u16 + value as u16 + carry_in as u16;
+        let carry_out = sum > 0xff;
+
+        if carry_out {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        }
+        else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+
+        let result = sum as u8;
+
+        if (value ^ result) & (result ^ self.register_a) & 0x80 != 0 {
+            self.processor_status = self.processor_status | 0b0100_0000;
+        } 
+        else {
+            self.processor_status = self.processor_status & 0b1011_1111;
+        }
+
+        self.register_a = result;
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
 
     fn update_zero_and_negative_flags(&mut self, result: u8) {
         if result == 0 {
@@ -239,6 +270,10 @@ impl CPU {
 
                 0xC0 | 0xC4 | 0xCC  => {
                     self.cmp(&opcode.mode, self.register_y);
+                }
+
+                0x69 | 0x65 | 0x75 | 0x6D | 0x7D | 0x79 | 0x61 | 0x71 => {
+                    self.adc(&opcode.mode);
                 }
 
                 0xAA => self.tax(),
@@ -420,6 +455,33 @@ mod test {
         cpu.load_and_run(vec![0xa0, 0x05, 0xc0, 0x06, 0x00]);
 
         assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
+    }
+
+    #[test]
+    fn test_adc_0x69() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0x69, 0x50, 0x00]);
+
+        assert_eq!(cpu.register_a, 0x50);
+    }
+
+    #[test]
+    fn test_adc_overflow_negative_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x50, 0x69, 0x50, 0x00]);
+
+        assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
+        assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
+        assert_eq!(cpu.register_a, 0xa0);
+    }
+
+    #[test]
+    fn test_adc_carry_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x50, 0x69, 0xd0, 0x00]);
+
+        assert!(cpu.processor_status & 0b0000_0001 == 0b0000_0001);
+        assert_eq!(cpu.register_a, 0x20);
     }
 
 }
