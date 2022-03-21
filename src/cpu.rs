@@ -196,6 +196,12 @@ impl CPU {
         self.operation_with_carry(value);
     }
 
+    fn sbc(&mut self, mode: &AddressingMode){
+        let addr = self.get_operand_address(mode);
+        let value = self.memory_read(addr);
+        self.operation_with_carry(0xff - value);
+    }
+
     fn operation_with_carry(&mut self, value: u8){
         let carry_in = self.processor_status & 0b0000_0001;
         let sum = self.register_a as u16 + value as u16 + carry_in as u16;
@@ -274,6 +280,10 @@ impl CPU {
 
                 0x69 | 0x65 | 0x75 | 0x6D | 0x7D | 0x79 | 0x61 | 0x71 => {
                     self.adc(&opcode.mode);
+                }
+
+                0xE9 | 0xE5 | 0xF5 | 0xED | 0xFD | 0xF9 | 0xE1 | 0xF1 => {
+                    self.sbc(&opcode.mode);
                 }
 
                 0xAA => self.tax(),
@@ -470,7 +480,7 @@ mod test {
         let mut cpu = CPU::new();
         cpu.load_and_run(vec![0xa9, 0x50, 0x69, 0x50, 0x00]);
 
-        assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
+        assert!(cpu.processor_status & 0b0100_0000 == 0b0100_0000);
         assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
         assert_eq!(cpu.register_a, 0xa0);
     }
@@ -482,6 +492,33 @@ mod test {
 
         assert!(cpu.processor_status & 0b0000_0001 == 0b0000_0001);
         assert_eq!(cpu.register_a, 0x20);
+    }
+
+    #[test]
+    fn test_sbc_0xe9() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x50, 0xe9, 0xf0, 0x00]);
+
+        assert_eq!(cpu.register_a, 0x5f);
+    }
+
+    #[test]
+    fn test_sbc_overflow_negative_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x50, 0xe9, 0xb0, 0x00]);
+
+        assert!(cpu.processor_status & 0b0100_0000 == 0b0100_0000);
+        assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
+        assert_eq!(cpu.register_a, 0x9f);
+    }
+
+    #[test]
+    fn test_sbc_carry_flag() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0xd0, 0xe9, 0x70, 0x00]);
+
+        assert!(cpu.processor_status & 0b0000_0001 == 0b0000_0001);
+        assert_eq!(cpu.register_a, 0x5f);
     }
 
 }

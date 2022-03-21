@@ -88,6 +88,15 @@ lazy_static! {
         map.insert(0x61, OpCode::new(0x61, "ADC", 2, 6, AddressingMode::Indirect_X));
         map.insert(0x71, OpCode::new(0x71, "ADC", 2, 5/*+1 if page crossed*/, AddressingMode::Indirect_Y));
 
+        map.insert(0xe9, OpCode::new(0xe9, "SBC", 2, 2, AddressingMode::Immediate));
+        map.insert(0xe5, OpCode::new(0xe5, "SBC", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0xf5, OpCode::new(0xf5, "SBC", 2, 4, AddressingMode::ZeroPage_X));
+        map.insert(0xed, OpCode::new(0xed, "SBC", 3, 4, AddressingMode::Absolute));
+        map.insert(0xfd, OpCode::new(0xfd, "SBC", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_X));
+        map.insert(0xf9, OpCode::new(0xf9, "SBC", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_Y));
+        map.insert(0xe1, OpCode::new(0xe1, "SBC", 2, 6, AddressingMode::Indirect_X));
+        map.insert(0xf1, OpCode::new(0xf1, "SBC", 2, 5/*+1 if page crossed*/, AddressingMode::Indirect_Y));
+
         map
     };
 
