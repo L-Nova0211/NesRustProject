@@ -209,6 +209,36 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_a);
     }
 
+    fn asl(&mut self, mode: &AddressingMode){
+        let addr = self.get_operand_address(mode);
+        let mut value = self.memory_read(addr);
+
+        if value >> 7 == 1 {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        } 
+        else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+
+        value = value << 1;
+        self.memory_write(addr, value);
+        self.update_zero_and_negative_flags(value);
+    }
+
+    fn asl_accumulator(&mut self){
+        let mut value = self.register_a;
+        if value >> 7 == 1 {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        }
+        else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+
+        value = value << 1;
+        self.register_a = value;
+        self.update_zero_and_negative_flags(value);
+    }
+
     fn operation_with_carry(&mut self, value: u8){
         let carry_in = self.processor_status & 0b0000_0001;
         let sum = self.register_a as u16 + value as u16 + carry_in as u16;
@@ -296,6 +326,12 @@ impl CPU {
                 0x29 | 0x25 | 0x35 | 0x2D | 0x3D | 0x39 | 0x21 | 0x31 => {
                     self.and(&opcode.mode);
                 }
+
+                0x06 | 0x16 | 0x0E | 0x1E => {
+                    self.asl(&opcode.mode);
+                }
+
+                0x0A => self.asl_accumulator(),
 
                 0xAA => self.tax(),
 
@@ -557,5 +593,14 @@ mod test {
         assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
         assert_eq!(cpu.register_a, 0xff);
     }
+
+    #[test]
+    fn test_asl_accumulator() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x01, 0x0a, 0x00]);
+
+        assert_eq!(cpu.register_a, 0x02);
+    }
+    
 
 }

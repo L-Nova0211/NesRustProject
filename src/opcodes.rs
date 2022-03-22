@@ -106,6 +106,12 @@ lazy_static! {
         map.insert(0x21, OpCode::new(0x21, "AND", 2, 6, AddressingMode::Indirect_X));
         map.insert(0x31, OpCode::new(0x31, "AND", 2, 5/*+1 if page crossed*/, AddressingMode::Indirect_Y));
 
+        map.insert(0x0a, OpCode::new(0x0a, "ASL", 2, 2, AddressingMode::NoneAddressing));
+        map.insert(0x06, OpCode::new(0x06, "ASL", 2, 5, AddressingMode::ZeroPage));
+        map.insert(0x16, OpCode::new(0x16, "ASL", 2, 6, AddressingMode::ZeroPage_X));
+        map.insert(0x0e, OpCode::new(0x0e, "ASL", 3, 6, AddressingMode::Absolute));
+        map.insert(0x1e, OpCode::new(0x1e, "ASL", 3, 7, AddressingMode::Absolute_X));
+
         map
     };
 
