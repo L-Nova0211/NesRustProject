@@ -239,6 +239,32 @@ impl CPU {
         self.update_zero_and_negative_flags(value);
     }
 
+    fn bit(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(mode);
+        let value = self.memory_read(addr);
+        let and = self.register_a & value;
+        if and == 0 {
+            self.processor_status = self.processor_status | 0b0000_0010;
+        } 
+        else {
+            self.processor_status = self.processor_status & 0b1111_1101;
+        }
+
+        if value & 0b10000000 > 0 {
+            self.processor_status = self.processor_status | 0b1000_0000;
+        }
+        else {
+            self.processor_status = self.processor_status | 0b0111_1111;
+        }
+
+        if value & 0b01000000 > 0 {
+            self.processor_status = self.processor_status | 0b0100_0000;
+        }
+        else {
+            self.processor_status = self.processor_status | 0b1011_1111;
+        }
+    }
+
     fn operation_with_carry(&mut self, value: u8){
         let carry_in = self.processor_status & 0b0000_0001;
         let sum = self.register_a as u16 + value as u16 + carry_in as u16;
@@ -329,6 +355,10 @@ impl CPU {
 
                 0x06 | 0x16 | 0x0E | 0x1E => {
                     self.asl(&opcode.mode);
+                }
+
+                0x24 | 0x2c => {
+                    self.bit(&opcode.mode);
                 }
 
                 0x0A => self.asl_accumulator(),
@@ -600,6 +630,17 @@ mod test {
         cpu.load_and_run(vec![0xa9, 0x01, 0x0a, 0x00]);
 
         assert_eq!(cpu.register_a, 0x02);
+    }
+
+    #[test]
+    fn test_0x24_bit() {
+        let mut cpu = CPU::new();
+        cpu.register_a = 0b00000010;
+        cpu.load_and_run(vec![0x24, 0x01]);
+
+        assert!(cpu.processor_status & 0b0000_0010 == 0b0000_0010);
+        assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
+        assert!(cpu.processor_status & 0b0100_0000 == 0b0100_0000);
     }
     
 

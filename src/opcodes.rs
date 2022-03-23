@@ -112,6 +112,9 @@ lazy_static! {
         map.insert(0x0e, OpCode::new(0x0e, "ASL", 3, 6, AddressingMode::Absolute));
         map.insert(0x1e, OpCode::new(0x1e, "ASL", 3, 7, AddressingMode::Absolute_X));
 
+        map.insert(0x24, OpCode::new(0x24, "ASL", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0x2c, OpCode::new(0x2c, "ASL", 3, 4, AddressingMode::Absolute));
+
         map
     };
 
