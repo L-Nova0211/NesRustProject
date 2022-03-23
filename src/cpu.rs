@@ -369,6 +369,10 @@ impl CPU {
 
                 0x00 => return,
 
+                0xea => {
+                    //do nothing
+                }
+
                 _ => todo!(),
             }
 

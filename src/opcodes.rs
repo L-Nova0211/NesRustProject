@@ -30,6 +30,7 @@ lazy_static! {
 
         //no mode
         map.insert(0x00, OpCode::new(0x00, "BRK", 1, 7, AddressingMode::NoneAddressing));
+        map.insert(0xea, OpCode::new(0xea, "NOP", 1, 2, AddressingMode::NoneAddressing));
         map.insert(0xaa, OpCode::new(0xaa, "TAX", 1, 2, AddressingMode::NoneAddressing));
         map.insert(0xe8, OpCode::new(0xe8, "INX", 1, 2, AddressingMode::NoneAddressing));
 
