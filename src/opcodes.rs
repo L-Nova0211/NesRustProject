@@ -32,6 +32,7 @@ lazy_static! {
         map.insert(0x00, OpCode::new(0x00, "BRK", 1, 7, AddressingMode::NoneAddressing));
         map.insert(0xea, OpCode::new(0xea, "NOP", 1, 2, AddressingMode::NoneAddressing));
         map.insert(0xaa, OpCode::new(0xaa, "TAX", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0x8a, OpCode::new(0x8a, "TXA", 1, 2, AddressingMode::NoneAddressing));
         map.insert(0xe8, OpCode::new(0xe8, "INX", 1, 2, AddressingMode::NoneAddressing));
 
         map.insert(0xa9, OpCode::new(0xa9, "LDA", 2, 2, AddressingMode::Immediate));
@@ -121,8 +122,8 @@ lazy_static! {
         map.insert(0x0e, OpCode::new(0x0e, "ASL", 3, 6, AddressingMode::Absolute));
         map.insert(0x1e, OpCode::new(0x1e, "ASL", 3, 7, AddressingMode::Absolute_X));
 
-        map.insert(0x24, OpCode::new(0x24, "ASL", 2, 3, AddressingMode::ZeroPage));
-        map.insert(0x2c, OpCode::new(0x2c, "ASL", 3, 4, AddressingMode::Absolute));
+        map.insert(0x24, OpCode::new(0x24, "BIT", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0x2c, OpCode::new(0x2c, "BIT", 3, 4, AddressingMode::Absolute));
 
         map
     };
