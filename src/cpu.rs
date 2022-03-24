@@ -196,6 +196,12 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_x);
     }
 
+    fn dex(&mut self) {
+        self.register_x = self.register_x.wrapping_sub(1);
+        self.update_zero_and_negative_flags(self.register_x);
+    }
+
+
     fn cmp(&mut self, mode: &AddressingMode, compared_register: u8){
         let addr = self.get_operand_address(mode);
         let value = self.memory_read(addr);
@@ -401,6 +407,8 @@ impl CPU {
 
                 0xE8 => self.inx(),
 
+                0xCA => self.dex(),
+
                 0x00 => return,
 
                 0xea => {
@@ -515,6 +523,15 @@ mod test {
         cpu.load_and_run(vec![0xa9, 0xff, 0xaa, 0xe8, 0x00]);
 
         assert_eq!(cpu.register_x, 0)
+    }
+
+    #[test]
+    fn test_0xca_dex() {
+        let mut cpu = CPU::new();
+        cpu.register_x = 0x00;
+        cpu.load_and_run(vec![0xca, 0x00]);
+
+        assert_eq!(cpu.register_x, 0xff)
     }
 
     #[test]
