@@ -63,6 +63,14 @@ lazy_static! {
         map.insert(0x81, OpCode::new(0x81, "STA", 2, 6, AddressingMode::Indirect_X));
         map.insert(0x91, OpCode::new(0x91, "STA", 2, 6, AddressingMode::Indirect_Y));
 
+        map.insert(0x86, OpCode::new(0x86, "STX", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0x96, OpCode::new(0x96, "STX", 2, 4, AddressingMode::ZeroPage_Y));
+        map.insert(0x8e, OpCode::new(0x8e, "STX", 3, 4, AddressingMode::Absolute));
+
+        map.insert(0x84, OpCode::new(0x84, "STY", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0x94, OpCode::new(0x94, "STY", 2, 4, AddressingMode::ZeroPage_X));
+        map.insert(0x8c, OpCode::new(0x8c, "STY", 3, 4, AddressingMode::Absolute));
+
         map.insert(0xc9, OpCode::new(0xc9, "CMP", 2, 2, AddressingMode::Immediate));
         map.insert(0xc5, OpCode::new(0xc5, "CMP", 2, 3, AddressingMode::ZeroPage));
         map.insert(0xd5, OpCode::new(0xd5, "CMP", 2, 4, AddressingMode::ZeroPage_X));

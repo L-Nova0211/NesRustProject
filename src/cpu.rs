@@ -166,6 +166,21 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_y);
     }
 
+    fn sta(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(&mode);
+        self.memory_write(addr, self.register_a);
+    }
+
+    fn stx(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(&mode);
+        self.memory_write(addr, self.register_x);
+    }
+
+    fn sty(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(&mode);
+        self.memory_write(addr, self.register_y);
+    }
+
     fn tax(&mut self) {
         self.register_x = self.register_a;
         self.update_zero_and_negative_flags(self.register_x);
@@ -327,6 +342,18 @@ impl CPU {
 
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => {
                     self.ldy(&opcode.mode);
+                }
+
+                0x85 | 0x95 | 0x8D | 0x9D | 0x99 | 0x81 | 0x91 => {
+                    self.sta(&opcode.mode);
+                }
+
+                0x86 | 0x96 | 0x8E => {
+                    self.stx(&opcode.mode);
+                }
+
+                0x84 | 0x94 | 0x8C => {
+                    self.sty(&opcode.mode);
                 }
 
                 0xC9 | 0xC5 | 0xD5 | 0xCD | 0xDD | 0xD9 | 0xC1 | 0xD1 => {
@@ -645,6 +672,33 @@ mod test {
         assert!(cpu.processor_status & 0b0000_0010 == 0b0000_0010);
         assert!(cpu.processor_status & 0b1000_0000 == 0b1000_0000);
         assert!(cpu.processor_status & 0b0100_0000 == 0b0100_0000);
+    }
+
+    #[test]
+    fn test_0x85_sta() {
+        let mut cpu = CPU::new();
+        cpu.register_a = 0b00000010;
+        cpu.load_and_run(vec![0x85, 0x02]);
+
+        assert!(cpu.memory_read(0x02) == cpu.register_a);
+    }
+
+    #[test]
+    fn test_0x86_stx() {
+        let mut cpu = CPU::new();
+        cpu.register_x = 0b00000010;
+        cpu.load_and_run(vec![0x86, 0x02]);
+
+        assert!(cpu.memory_read(0x02) == cpu.register_x);
+    }
+
+    #[test]
+    fn test_0x84_sty() {
+        let mut cpu = CPU::new();
+        cpu.register_y = 0b00000010;
+        cpu.load_and_run(vec![0x84, 0x02]);
+
+        assert!(cpu.memory_read(0x02) == cpu.register_y);
     }
     
 
