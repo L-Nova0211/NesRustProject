@@ -291,6 +291,19 @@ impl CPU {
         }
     }
 
+
+    fn branch(&mut self, condition: bool) {
+        if condition {
+            let jump: i8 = self.memory_read(self.program_counter) as i8;
+            let jump_addr = self
+                .program_counter
+                .wrapping_add(1)
+                .wrapping_add(jump as u16);
+
+            self.program_counter = jump_addr;
+        }
+    }
+
     fn operation_with_carry(&mut self, value: u8){
         let carry_in = self.processor_status & 0b0000_0001;
         let sum = self.register_a as u16 + value as u16 + carry_in as u16;
@@ -397,6 +410,38 @@ impl CPU {
 
                 0x24 | 0x2c => {
                     self.bit(&opcode.mode);
+                }
+
+                0xd0 => {
+                    self.branch(self.processor_status & 0b0000_0010 != 0b0000_0010);
+                }
+
+                0x70 => {
+                    self.branch(self.processor_status & 0b0100_0000 == 0b0100_0000);
+                }
+
+                0x50 => {
+                    self.branch(self.processor_status & 0b0100_0000 != 0b0100_0000);
+                }
+
+                0x10 => {
+                    self.branch(self.processor_status & 0b1000_0000 != 0b1000_0000);
+                }
+
+                0x30 => {
+                    self.branch(self.processor_status & 0b1000_0000 == 0b1000_0000);
+                }
+
+                0xf0 => {
+                    self.branch(self.processor_status & 0b0000_0010 == 0b0000_0010);
+                }
+
+                0xb0 => {
+                    self.branch(self.processor_status & 0b0000_0001 == 0b0000_0001);
+                }
+
+                0x90 => {
+                    self.branch(self.processor_status & 0b0000_0001 != 0b0000_0001);
                 }
 
                 0x0A => self.asl_accumulator(),
@@ -730,6 +775,23 @@ mod test {
         cpu.load_and_run(vec![0x84, 0x02]);
 
         assert!(cpu.memory_read(0x02) == cpu.register_y);
+    }
+
+    #[test]
+    fn test_0xd0_bne_snippet() {
+        let mut cpu = CPU::new();
+
+        /*
+            LDX #$08
+        decrement:
+            DEX
+            CPX #$03
+            BNE decrement
+            BRK
+        */
+        
+        cpu.load_and_run(vec![0xa2, 0x08, 0xca, 0xe0, 0x03, 0xd0, 0xfb, 0x00 ]);
+        assert_eq!(cpu.register_x, 0x03);
     }
     
 
