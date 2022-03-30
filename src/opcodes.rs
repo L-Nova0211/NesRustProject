@@ -136,6 +136,11 @@ lazy_static! {
         map.insert(0x90, OpCode::new(0x90, "BCC", 2, 2 /*(+1 if branch succeeds +2 if to a new page)*/, AddressingMode::NoneAddressing));
         map.insert(0x10, OpCode::new(0x10, "BPL", 2, 2 /*(+1 if branch succeeds +2 if to a new page)*/, AddressingMode::NoneAddressing));
 
+        map.insert(0xc6, OpCode::new(0xc6, "DEC", 2, 5, AddressingMode::ZeroPage));
+        map.insert(0xd6, OpCode::new(0xd6, "DEC", 2, 6, AddressingMode::ZeroPage_X));
+        map.insert(0xce, OpCode::new(0xce, "DEC", 3, 6, AddressingMode::Absolute));
+        map.insert(0xde, OpCode::new(0xde, "DEC", 3, 7, AddressingMode::Absolute_X));
+
         map
     };
 
