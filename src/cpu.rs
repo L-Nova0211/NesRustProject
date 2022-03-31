@@ -467,6 +467,34 @@ impl CPU {
                     self.branch(self.processor_status & 0b0000_0001 != 0b0000_0001);
                 }
 
+                0xD8 => {
+                    self.processor_status = self.processor_status & 0b1111_0111;
+                }
+
+                0x58 => {
+                    self.processor_status = self.processor_status & 0b1111_1011;
+                }
+
+                0xB8 => {
+                    self.processor_status = self.processor_status & 0b1011_1111;
+                }
+
+                0x18 => {
+                    self.processor_status = self.processor_status & 0b1111_1110;
+                }
+
+                0x38 => {
+                    self.processor_status = self.processor_status | 0b0000_0001;
+                }
+
+                0x78 => {
+                    self.processor_status = self.processor_status | 0b0000_0100;
+                }
+
+                0xF8 => {
+                    self.processor_status = self.processor_status | 0b0000_1000;
+                }
+
                 0x0A => self.asl_accumulator(),
 
                 0xAA => self.tax(),

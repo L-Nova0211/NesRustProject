@@ -150,6 +150,15 @@ lazy_static! {
         map.insert(0xce, OpCode::new(0xce, "DEC", 3, 6, AddressingMode::Absolute));
         map.insert(0xde, OpCode::new(0xde, "DEC", 3, 7, AddressingMode::Absolute_X));
 
+
+        map.insert(0xd8, OpCode::new(0xd8, "CLD", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0x58, OpCode::new(0x58, "CLI", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0xb8, OpCode::new(0xb8, "CLV", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0x18, OpCode::new(0x18, "CLC", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0x38, OpCode::new(0x38, "SEC", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0x78, OpCode::new(0x78, "SEI", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0xf8, OpCode::new(0xf8, "SED", 1, 2, AddressingMode::NoneAddressing));
+
         map
     };
 
