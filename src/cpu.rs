@@ -210,6 +210,15 @@ impl CPU {
         value
     }
 
+    fn inc(&mut self, mode: &AddressingMode) -> u8 {
+        let addr = self.get_operand_address(mode);
+        let mut value = self.memory_read(addr);
+        value = value.wrapping_add(1);
+        self.memory_write(addr, value);
+        self.update_zero_and_negative_flags(value);
+        value
+    }
+
     fn cmp(&mut self, mode: &AddressingMode, compared_register: u8){
         let addr = self.get_operand_address(mode);
         let value = self.memory_read(addr);
@@ -431,8 +440,12 @@ impl CPU {
                     self.bit(&opcode.mode);
                 }
 
-                0xc6 | 0xd6 | 0xce | 0xde => {
+                0xC6 | 0xD6 | 0xCE | 0xDE => {
                     self.dec(&opcode.mode);
+                }
+
+                0xE6 | 0xF6 | 0xEE | 0xFE => {
+                    self.inc(&opcode.mode);
                 }
 
                 0xd0 => {
@@ -851,6 +864,14 @@ mod test {
         cpu.load_and_run(vec![0xa9, 0x05, 0x85, 0x02, 0xc6, 0x02]);
 
         assert_eq!(cpu.memory_read(0x02), cpu.register_a - 1);
+    }
+
+    #[test]
+    fn test_0xe6_inc() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x05, 0x85, 0x02, 0xe6, 0x02]);
+
+        assert_eq!(cpu.memory_read(0x02), cpu.register_a + 1);
     }
 
     #[test]
