@@ -136,6 +136,15 @@ lazy_static! {
         map.insert(0x90, OpCode::new(0x90, "BCC", 2, 2 /*(+1 if branch succeeds +2 if to a new page)*/, AddressingMode::NoneAddressing));
         map.insert(0x10, OpCode::new(0x10, "BPL", 2, 2 /*(+1 if branch succeeds +2 if to a new page)*/, AddressingMode::NoneAddressing));
 
+        map.insert(0x49, OpCode::new(0x49, "EOR", 2, 2, AddressingMode::Immediate));
+        map.insert(0x45, OpCode::new(0x45, "EOR", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0x55, OpCode::new(0x55, "EOR", 2, 4, AddressingMode::ZeroPage_X));
+        map.insert(0x4d, OpCode::new(0x4d, "EOR", 3, 4, AddressingMode::Absolute));
+        map.insert(0x5d, OpCode::new(0x5d, "EOR", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_X));
+        map.insert(0x59, OpCode::new(0x59, "EOR", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_Y));
+        map.insert(0x41, OpCode::new(0x41, "EOR", 2, 6, AddressingMode::Indirect_X));
+        map.insert(0x51, OpCode::new(0x51, "EOR", 2, 5/*+1 if page crossed*/, AddressingMode::Indirect_Y));
+
         map.insert(0xc6, OpCode::new(0xc6, "DEC", 2, 5, AddressingMode::ZeroPage));
         map.insert(0xd6, OpCode::new(0xd6, "DEC", 2, 6, AddressingMode::ZeroPage_X));
         map.insert(0xce, OpCode::new(0xce, "DEC", 3, 6, AddressingMode::Absolute));

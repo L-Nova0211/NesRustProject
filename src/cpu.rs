@@ -312,6 +312,13 @@ impl CPU {
         }
     }
 
+    fn eor(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(mode);
+        let value = self.memory_read(addr);
+        self.register_a = value ^ self.register_a;
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
     fn operation_with_carry(&mut self, value: u8){
         let carry_in = self.processor_status & 0b0000_0001;
         let sum = self.register_a as u16 + value as u16 + carry_in as u16;
@@ -410,6 +417,10 @@ impl CPU {
 
                 0x29 | 0x25 | 0x35 | 0x2D | 0x3D | 0x39 | 0x21 | 0x31 => {
                     self.and(&opcode.mode);
+                }
+
+                0x49 | 0x45 | 0x55 | 0x4d | 0x5d | 0x59 | 0x41 | 0x51 => {
+                    self.eor(&opcode.mode);
                 }
 
                 0x06 | 0x16 | 0x0E | 0x1E => {
@@ -812,6 +823,14 @@ mod test {
         cpu.load_and_run(vec![0xa9, 0x05, 0x85, 0x02, 0xc6, 0x02]);
 
         assert_eq!(cpu.memory_read(0x02), cpu.register_a - 1);
+    }
+
+    #[test]
+    fn test_0x49_eor() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0x49, 0xff]);
+
+        assert_eq!(cpu.register_a, 0xff);
     }
 
 }
