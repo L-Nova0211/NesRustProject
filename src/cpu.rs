@@ -528,6 +528,30 @@ impl CPU {
                     self.processor_status = self.processor_status | 0b0000_1000;
                 }
 
+                0x4C => {
+                    let mem_address = self.memory_read_u16(self.program_counter);
+                    self.program_counter = mem_address;
+                }
+
+                0x6c => {
+                    let mem_address = self.memory_read_u16(self.program_counter);
+                    // let indirect_ref = self.memory_read_u16(mem_address);
+                    //6502 bug mode with with page boundary:
+                    //  if address $3000 contains $40, $30FF contains $80, and $3100 contains $50,
+                    // the result of JMP ($30FF) will be a transfer of control to $4080 rather than $5080 as you intended
+                    // i.e. the 6502 took the low byte of the address from $30FF and the high byte from $3000
+
+                    let indirect_ref = if mem_address & 0x00FF == 0x00FF {
+                        let lo = self.memory_read(mem_address);
+                        let hi = self.memory_read(mem_address & 0xFF00);
+                        (hi as u16) << 8 | (lo as u16)
+                    } else {
+                        self.memory_read_u16(mem_address)
+                    };
+
+                    self.program_counter = indirect_ref;
+                }
+
                 0x0A => self.asl_accumulator(),
 
                 0xAA => self.tax(),
