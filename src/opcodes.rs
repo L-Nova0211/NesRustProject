@@ -170,6 +170,12 @@ lazy_static! {
         map.insert(0x78, OpCode::new(0x78, "SEI", 1, 2, AddressingMode::NoneAddressing));
         map.insert(0xf8, OpCode::new(0xf8, "SED", 1, 2, AddressingMode::NoneAddressing));
 
+        map.insert(0x4a, OpCode::new(0x4a, "LSR", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0x46, OpCode::new(0x46, "LSR", 2, 5, AddressingMode::ZeroPage));
+        map.insert(0x56, OpCode::new(0x56, "LSR", 2, 6, AddressingMode::ZeroPage_X));
+        map.insert(0x4e, OpCode::new(0x4e, "LSR", 3, 6, AddressingMode::Absolute));
+        map.insert(0x5e, OpCode::new(0x5e, "LSR", 3, 7, AddressingMode::Absolute_X));
+
         map
     };
 

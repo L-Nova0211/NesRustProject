@@ -348,6 +348,37 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_a);
     }
 
+    fn lsr_accumulator(&mut self){
+        let mut value = self.register_a;
+        if value & 1 == 1 {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        }
+        else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+
+        value = value >> 1;
+
+        self.register_a = value;
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
+    fn lsr(&mut self, mode: &AddressingMode) -> u8 {
+        let addr = self.get_operand_address(mode);
+        let mut value = self.memory_read(addr);
+        if value & 1 == 1 {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        } 
+        else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+
+        value = value >> 1;
+        self.memory_write(addr, value);
+        self.update_zero_and_negative_flags(value);
+        value
+    }
+
     fn operation_with_carry(&mut self, value: u8){
         let carry_in = self.processor_status & 0b0000_0001;
         let sum = self.register_a as u16 + value as u16 + carry_in as u16;
@@ -466,6 +497,14 @@ impl CPU {
 
                 0xE6 | 0xF6 | 0xEE | 0xFE => {
                     self.inc(&opcode.mode);
+                }
+
+                0x4A => {
+                    self.lsr_accumulator();
+                }
+
+                0x46 | 0x56 | 0x4E | 0x5E => {
+                    self.lsr(&opcode.mode);
                 }
 
                 0xd0 => {
@@ -964,6 +1003,15 @@ mod test {
         cpu.load_and_run(vec![0x49, 0xff]);
 
         assert_eq!(cpu.register_a, 0xff);
+    }
+
+    #[test]
+    fn test_0x4a_lsr() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x05, 0x4a, 0x00]);
+
+        assert_eq!(cpu.register_a, 2);
+        assert!(cpu.processor_status & 1 == 1);
     }
 
 }
