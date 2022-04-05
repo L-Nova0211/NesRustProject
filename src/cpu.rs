@@ -186,6 +186,11 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_x);
     }
 
+    fn tay(&mut self) {
+        self.register_y = self.register_a;
+        self.update_zero_and_negative_flags(self.register_y);
+    }
+
     fn txa(&mut self) {
         self.register_a = self.register_x;
         self.update_zero_and_negative_flags(self.register_a);
@@ -194,6 +199,11 @@ impl CPU {
     fn inx(&mut self) {
         self.register_x = self.register_x.wrapping_add(1);
         self.update_zero_and_negative_flags(self.register_x);
+    }
+
+    fn iny(&mut self) {
+        self.register_y = self.register_y.wrapping_add(1);
+        self.update_zero_and_negative_flags(self.register_y);
     }
 
     fn dex(&mut self) {
@@ -514,7 +524,11 @@ impl CPU {
 
                 0x8A => self.txa(),
 
+                0xA8 => self.tay(),
+
                 0xE8 => self.inx(),
+
+                0xC8 => self.iny(),
 
                 0xCA => self.dex(),
 
@@ -619,6 +633,13 @@ mod test {
     }
 
     #[test]
+    fn test_0xa8_tay_is_moving_from_a_to_y() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa9, 0x05, 0xa8, 0x00]);
+        assert_eq!(cpu.register_y, 5);
+    }
+
+    #[test]
     fn test_0x8a_txa_is_moving_from_x_to_a() {
         let mut cpu = CPU::new();
         cpu.load_and_run(vec![0xa2, 0x05, 0x8a, 0x00]);
@@ -632,6 +653,15 @@ mod test {
         cpu.load_and_run(vec![0xa9, 0xff, 0xaa, 0xe8, 0x00]);
 
         assert_eq!(cpu.register_x, 0)
+    }
+
+    #[test]
+    fn test_iny_overflow() {
+        let mut cpu = CPU::new();
+        cpu.register_y = 0xff;
+        cpu.load_and_run(vec![0xa0, 0xff, 0xa8, 0xe8, 0x00]);
+
+        assert_eq!(cpu.register_y, 0)
     }
 
     #[test]
