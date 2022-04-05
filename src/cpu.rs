@@ -191,6 +191,11 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_y);
     }
 
+    fn tya(&mut self) {
+        self.register_a = self.register_y;
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
     fn txa(&mut self) {
         self.register_a = self.register_x;
         self.update_zero_and_negative_flags(self.register_a);
@@ -209,6 +214,11 @@ impl CPU {
     fn dex(&mut self) {
         self.register_x = self.register_x.wrapping_sub(1);
         self.update_zero_and_negative_flags(self.register_x);
+    }
+
+    fn dey(&mut self) {
+        self.register_y = self.register_y.wrapping_sub(1);
+        self.update_zero_and_negative_flags(self.register_y);
     }
 
     fn dec(&mut self, mode: &AddressingMode) -> u8 {
@@ -532,6 +542,10 @@ impl CPU {
 
                 0xCA => self.dex(),
 
+                0x88 => self.dey(),
+
+                0x98 => self.tya(),
+
                 0x00 => return,
 
                 0xea => {
@@ -640,6 +654,13 @@ mod test {
     }
 
     #[test]
+    fn test_0x98_tya_is_moving_from_y_to_a() {
+        let mut cpu = CPU::new();
+        cpu.load_and_run(vec![0xa0, 0x05, 0x98, 0x00]);
+        assert_eq!(cpu.register_a, 5);
+    }
+
+    #[test]
     fn test_0x8a_txa_is_moving_from_x_to_a() {
         let mut cpu = CPU::new();
         cpu.load_and_run(vec![0xa2, 0x05, 0x8a, 0x00]);
@@ -671,6 +692,15 @@ mod test {
         cpu.load_and_run(vec![0xca, 0x00]);
 
         assert_eq!(cpu.register_x, 0xff)
+    }
+
+    #[test]
+    fn test_0x88_dex() {
+        let mut cpu = CPU::new();
+        cpu.register_y = 0x00;
+        cpu.load_and_run(vec![0x88, 0x00]);
+
+        assert_eq!(cpu.register_y, 0xff)
     }
 
     #[test]
