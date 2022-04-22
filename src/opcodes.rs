@@ -186,6 +186,11 @@ lazy_static! {
         map.insert(0x4e, OpCode::new(0x4e, "LSR", 3, 6, AddressingMode::Absolute));
         map.insert(0x5e, OpCode::new(0x5e, "LSR", 3, 7, AddressingMode::Absolute_X));
 
+        map.insert(0x48, OpCode::new(0x48, "PHA", 1, 3, AddressingMode::NoneAddressing));
+        map.insert(0x68, OpCode::new(0x68, "PLA", 1, 4, AddressingMode::NoneAddressing));
+        map.insert(0x08, OpCode::new(0x08, "PHP", 1, 3, AddressingMode::NoneAddressing));
+        map.insert(0x28, OpCode::new(0x28, "PLP", 1, 4, AddressingMode::NoneAddressing));
+
         map
     };
 

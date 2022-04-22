@@ -327,6 +327,25 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_a);
     }
 
+    fn pla(&mut self) {
+        let data = self.stack_pop();
+        self.register_a = data;
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
+    fn php(&mut self) {
+        //http://wiki.nesdev.com/w/index.php/CPU_status_flag_behavior
+        let mut flags = self.processor_status.clone();
+        flags = flags | 0b0011_0000;
+        self.stack_push(flags);
+    }
+
+    fn plp(&mut self) {
+        self.processor_status = self.stack_pop();
+        self.processor_status = self.processor_status & 0b1110_1111;
+        self.processor_status = self.processor_status | 0b0010_0000;
+    }
+
     fn asl_accumulator(&mut self){
         let mut value = self.register_a;
         if value >> 7 == 1 {
@@ -657,6 +676,14 @@ impl CPU {
                 0x88 => self.dey(),
 
                 0x98 => self.tya(),
+
+                0x48 => self.stack_push(self.register_a),
+
+                0x68 => self.pla(),
+
+                0x08 => self.php(),
+
+                0x28 => self.plp(),
 
                 0x00 => return,
 
