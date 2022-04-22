@@ -1,12 +1,17 @@
 use std::collections::HashMap;
 use crate::opcodes;
 
+
+const STACK: u16 = 0x0100;
+const STACK_RESET: u8 = 0xfd;
+
 pub struct CPU {
     pub register_a: u8,
     pub register_x: u8,
     pub register_y: u8,
     pub processor_status: u8,
     pub program_counter: u16,
+    pub stack_pointer: u8,
     memory: [u8; 0xFFFF]
 }
 
@@ -63,6 +68,7 @@ impl CPU {
             register_a: 0,
             register_x: 0,
             register_y: 0,
+            stack_pointer: STACK_RESET,
             processor_status: 0,
             program_counter: 0,
             memory: [0; 0xFFFF]
@@ -128,6 +134,8 @@ impl CPU {
     pub fn reset(&mut self) {
         self.register_a = 0;
         self.register_x = 0;
+        self.register_y = 0;
+        self.stack_pointer = STACK_RESET;
         self.processor_status = 0;
  
         self.program_counter = self.memory_read_u16(0xFFFC);
@@ -286,6 +294,37 @@ impl CPU {
         value = value << 1;
         self.memory_write(addr, value);
         self.update_zero_and_negative_flags(value);
+    }
+
+    fn stack_pop(&mut self) -> u8 {
+        self.stack_pointer = self.stack_pointer.wrapping_add(1);
+        self.memory_read((STACK as u16) + self.stack_pointer as u16)
+    }
+
+    fn stack_push(&mut self, data: u8) {
+        self.memory_write((STACK as u16) + self.stack_pointer as u16, data);
+        self.stack_pointer = self.stack_pointer.wrapping_sub(1)
+    }
+
+    fn stack_push_u16(&mut self, data: u16) {
+        let hi = (data >> 8) as u8;
+        let lo = (data & 0xff) as u8;
+        self.stack_push(hi);
+        self.stack_push(lo);
+    }
+
+    fn stack_pop_u16(&mut self) -> u16 {
+        let lo = self.stack_pop() as u16;
+        let hi = self.stack_pop() as u16;
+
+        hi << 8 | lo
+    }
+
+    fn ora(&mut self, mode: &AddressingMode) {
+        let addr = self.get_operand_address(mode);
+        let value = self.memory_read(addr);
+        self.register_a = value | self.register_a;
+        self.update_zero_and_negative_flags(self.register_a);
     }
 
     fn asl_accumulator(&mut self){
@@ -507,6 +546,10 @@ impl CPU {
                     self.lsr(&opcode.mode);
                 }
 
+                0x09 | 0x05 | 0x15 | 0x0d | 0x1d | 0x19 | 0x01 | 0x11 => {
+                    self.ora(&opcode.mode);
+                }
+
                 0xd0 => {
                     self.branch(self.processor_status & 0b0000_0010 != 0b0000_0010);
                 }
@@ -589,6 +632,12 @@ impl CPU {
                     };
 
                     self.program_counter = indirect_ref;
+                }
+
+                0x20 => {
+                    self.stack_push_u16(self.program_counter + 2 - 1);
+                    let target_address = self.memory_read_u16(self.program_counter);
+                    self.program_counter = target_address
                 }
 
                 0x0A => self.asl_accumulator(),

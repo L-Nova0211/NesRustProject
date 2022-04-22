@@ -132,6 +132,7 @@ lazy_static! {
 
         map.insert(0x4c, OpCode::new(0x4c, "JMP", 3, 3, AddressingMode::NoneAddressing));
         map.insert(0x6c, OpCode::new(0x6c, "JMP", 3, 5, AddressingMode::NoneAddressing));
+        map.insert(0x20, OpCode::new(0x20, "JSR", 3, 6, AddressingMode::NoneAddressing));
 
         //branches
         map.insert(0xd0, OpCode::new(0xd0, "BNE", 2, 2 /*(+1 if branch succeeds +2 if to a new page)*/, AddressingMode::NoneAddressing));
@@ -151,6 +152,15 @@ lazy_static! {
         map.insert(0x59, OpCode::new(0x59, "EOR", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_Y));
         map.insert(0x41, OpCode::new(0x41, "EOR", 2, 6, AddressingMode::Indirect_X));
         map.insert(0x51, OpCode::new(0x51, "EOR", 2, 5/*+1 if page crossed*/, AddressingMode::Indirect_Y));
+
+        map.insert(0x09, OpCode::new(0x09, "ORA", 2, 2, AddressingMode::Immediate));
+        map.insert(0x05, OpCode::new(0x05, "ORA", 2, 3, AddressingMode::ZeroPage));
+        map.insert(0x15, OpCode::new(0x15, "ORA", 2, 4, AddressingMode::ZeroPage_X));
+        map.insert(0x0d, OpCode::new(0x0d, "ORA", 3, 4, AddressingMode::Absolute));
+        map.insert(0x1d, OpCode::new(0x1d, "ORA", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_X));
+        map.insert(0x19, OpCode::new(0x19, "ORA", 3, 4/*+1 if page crossed*/, AddressingMode::Absolute_Y));
+        map.insert(0x01, OpCode::new(0x01, "ORA", 2, 6, AddressingMode::Indirect_X));
+        map.insert(0x11, OpCode::new(0x11, "ORA", 2, 5/*+1 if page crossed*/, AddressingMode::Indirect_Y));
 
         map.insert(0xc6, OpCode::new(0xc6, "DEC", 2, 5, AddressingMode::ZeroPage));
         map.insert(0xd6, OpCode::new(0xd6, "DEC", 2, 6, AddressingMode::ZeroPage_X));
