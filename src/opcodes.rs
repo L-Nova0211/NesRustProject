@@ -162,6 +162,12 @@ lazy_static! {
         map.insert(0x01, OpCode::new(0x01, "ORA", 2, 6, AddressingMode::Indirect_X));
         map.insert(0x11, OpCode::new(0x11, "ORA", 2, 5/*+1 if page crossed*/, AddressingMode::Indirect_Y));
 
+        map.insert(0x2a, OpCode::new(0x2a, "ROL", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0x26, OpCode::new(0x26, "ROL", 2, 5, AddressingMode::ZeroPage));
+        map.insert(0x36, OpCode::new(0x36, "ROL", 2, 6, AddressingMode::ZeroPage_X));
+        map.insert(0x2e, OpCode::new(0x2e, "ROL", 3, 6, AddressingMode::Absolute));
+        map.insert(0x3e, OpCode::new(0x3e, "ROL", 3, 7, AddressingMode::Absolute_X));
+
         map.insert(0xc6, OpCode::new(0xc6, "DEC", 2, 5, AddressingMode::ZeroPage));
         map.insert(0xd6, OpCode::new(0xd6, "DEC", 2, 6, AddressingMode::ZeroPage_X));
         map.insert(0xce, OpCode::new(0xce, "DEC", 3, 6, AddressingMode::Absolute));

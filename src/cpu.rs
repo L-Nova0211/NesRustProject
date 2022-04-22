@@ -437,6 +437,55 @@ impl CPU {
         value
     }
 
+    fn rol(&mut self, mode: &AddressingMode) -> u8 {
+        let addr = self.get_operand_address(mode);
+        let mut value = self.memory_read(addr);
+        let mut old_carry = false;
+
+        if self.processor_status & 0b0000_0001 == 0b0000_0001 {
+            old_carry = true;
+        }
+
+        if value >> 7 == 1 {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        } 
+        else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+
+        value = value << 1;
+        if old_carry {
+            value = value | 1;
+        }
+        self.memory_write(addr, value);
+        self.update_zero_and_negative_flags(value);
+        value
+    }
+
+    fn rol_accumulator(&mut self) {
+        let mut value = self.register_a;
+        let mut old_carry = false;
+
+        if self.processor_status & 0b0000_0001 == 0b0000_0001 {
+            old_carry = true;
+        }
+
+        if value >> 7 == 1 {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        } 
+        else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+
+        value = value << 1;
+        if old_carry {
+            value = value | 1;
+        }
+
+        self.register_a = value;
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
     fn operation_with_carry(&mut self, value: u8){
         let carry_in = self.processor_status & 0b0000_0001;
         let sum = self.register_a as u16 + value as u16 + carry_in as u16;
@@ -657,6 +706,12 @@ impl CPU {
                     self.stack_push_u16(self.program_counter + 2 - 1);
                     let target_address = self.memory_read_u16(self.program_counter);
                     self.program_counter = target_address
+                }
+
+                0x2a => self.rol_accumulator(),
+                
+                0x26 | 0x36 | 0x2e | 0x3e => {
+                    self.rol(&opcode.mode);
                 }
 
                 0x0A => self.asl_accumulator(),
