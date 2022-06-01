@@ -773,6 +773,18 @@ impl CPU {
                     self.ror(&opcode.mode);
                 }
 
+                0x40 => {
+                    self.processor_status = self.stack_pop();
+                    self.processor_status = self.processor_status & 0b1110_1111;
+                    self.processor_status = self.processor_status | 0b0010_0000;
+
+                    self.program_counter = self.stack_pop_u16();
+                }
+
+                0x60 => {
+                    self.program_counter = self.stack_pop_u16() + 1;
+                }
+
                 0x0A => self.asl_accumulator(),
 
                 0xAA => self.tax(),

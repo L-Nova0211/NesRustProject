@@ -41,6 +41,8 @@ lazy_static! {
         map.insert(0x88, OpCode::new(0x88, "DEY", 1, 2, AddressingMode::NoneAddressing));
         map.insert(0xba, OpCode::new(0xba, "TSX", 1, 2, AddressingMode::NoneAddressing));
         map.insert(0x9a, OpCode::new(0x9a, "TXS", 1, 2, AddressingMode::NoneAddressing));
+        map.insert(0x40, OpCode::new(0x40, "RTI", 1, 6, AddressingMode::NoneAddressing));
+        map.insert(0x60, OpCode::new(0x60, "RTS", 1, 6, AddressingMode::NoneAddressing));
 
         map.insert(0xa9, OpCode::new(0xa9, "LDA", 2, 2, AddressingMode::Immediate));
         map.insert(0xa5, OpCode::new(0xa5, "LDA", 2, 3, AddressingMode::ZeroPage));
