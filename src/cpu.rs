@@ -486,6 +486,50 @@ impl CPU {
         self.update_zero_and_negative_flags(self.register_a);
     }
 
+    fn ror(&mut self, mode: &AddressingMode) -> u8 {
+        let addr = self.get_operand_address(mode);
+        let mut value = self.memory_read(addr);
+        let mut old_carry = false;
+
+        if self.processor_status & 0b0000_0001 == 0b0000_0001 {
+            old_carry = true;
+        }
+
+        if value & 1 == 1 {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        } else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+        value = value >> 1;
+        if old_carry {
+            value = value | 0b10000000;
+        }
+        self.memory_write(addr, value);
+        self.update_zero_and_negative_flags(value);
+        value
+    }
+
+    fn ror_accumulator(&mut self) {
+        let mut value = self.register_a;
+        let mut old_carry = false;
+
+        if self.processor_status & 0b0000_0001 == 0b0000_0001 {
+            old_carry = true;
+        }
+
+        if value & 1 == 1 {
+            self.processor_status = self.processor_status | 0b0000_0001;
+        } else {
+            self.processor_status = self.processor_status & 0b1111_1110;
+        }
+        value = value >> 1;
+        if old_carry {
+            value = value | 0b10000000;
+        }
+        self.register_a = value;
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
     fn operation_with_carry(&mut self, value: u8){
         let carry_in = self.processor_status & 0b0000_0001;
         let sum = self.register_a as u16 + value as u16 + carry_in as u16;
@@ -712,6 +756,12 @@ impl CPU {
                 
                 0x26 | 0x36 | 0x2e | 0x3e => {
                     self.rol(&opcode.mode);
+                }
+
+                0x6a => self.ror_accumulator(),
+
+                0x66 | 0x76 | 0x6e | 0x7e => {
+                    self.ror(&opcode.mode);
                 }
 
                 0x0A => self.asl_accumulator(),
